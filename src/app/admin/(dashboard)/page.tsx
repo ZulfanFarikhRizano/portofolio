@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProjectTable } from "@/components/admin/ProjectTable";
 import type { ProjectDTO } from "@/types";
 
+
 export const dynamic = "force-dynamic";
 
 async function getProjects(): Promise<ProjectDTO[]> {

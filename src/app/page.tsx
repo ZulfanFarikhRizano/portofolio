@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Hero, type HeroContent } from "@/components/Hero";
+import { ParallaxHero } from "@/components/ParallaxHero";
 import { ProjectShowcase } from "@/components/ProjectShowcase";
 import { WritingsSection } from "@/components/WritingsSection";
 import { About, type AboutContent } from "@/components/About";
@@ -73,6 +74,7 @@ export default async function HomePage() {
 
   return (
     <main className="relative">
+      <ParallaxHero />
       <Hero content={hero} />
       <ProjectShowcase projects={projects} />
       <WritingsSection writings={writings} />
