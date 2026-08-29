@@ -73,8 +73,8 @@ export function WritingTable({ initialWritings }: { initialWritings: WritingDTO[
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-ink/10">
-      <table className="w-full border-collapse text-left text-[14px]">
+    <div className="overflow-x-auto rounded-2xl border border-ink/10">
+  <table className="w-full min-w-[680px] border-collapse text-left text-[14px]">
         <thead>
           <tr className="border-b border-ink/10 bg-ink/[0.03] text-[12px] uppercase tracking-wide text-ink/50">
             <th className="px-4 py-3 font-medium">Urutan</th>
