@@ -31,7 +31,11 @@ export function Contact({ content }: { content: ContactContent }) {
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.7, ease, delay: 0.1 }}
         className="mt-6 flex items-center gap-4 text-[9vw] uppercase leading-none tracking-tight transition hover:opacity-80 md:text-[4vw]"
-        style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
+        style={{
+        fontFamily: "'Trobika', 'Bebas Neue', sans-serif",
+        wordBreak: "break-all",
+        overflowWrap: "anywhere"
+        }}
       >
         <Mail className="size-[0.6em]" />
         {content.email}
