@@ -25,7 +25,7 @@ const defaultAbout: AboutContent = {
 
 const defaultContact: ContactContent = {
   heading: "Kontak",
-  email: "hello@example.com",
+  email: "farikhrizano@gmail.com",
   socials: []
 };
 
