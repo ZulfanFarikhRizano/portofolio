@@ -1,0 +1,76 @@
+// Prisma schema — Portfolio CMS
+// Datasource: PostgreSQL (Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL") // Dinonaktifkan untuk mencegah error connection pooler di lokal
+}
+
+/// Satu proyek portofolio yang tampil di CoverflowCarousel + showcase.
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  subtitle    String?
+  description String
+  bannerImage String
+  tags        String   @default("") // disimpan sebagai string dipisah koma, mis: "Next.js,Prisma,Tailwind"
+
+  // Tautan eksternal
+  liveUrl     String?
+  githubUrl   String?
+  figmaUrl    String?
+
+  // Kontrol urutan slide di carousel (ascending)
+  order       Int      @default(0)
+
+  // Status tayang di halaman publik
+  published   Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+/// Konten statis halaman About & Contact yang bisa diubah lewat /admin
+model SiteSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique // "about" | "contact" | "hero"
+  valueJson String           // payload JSON bebas untuk setiap section
+  updatedAt DateTime @updatedAt
+}
+
+/// Karya tulis (artikel, esai, paper, catatan riset, dsb) yang pernah dibuat.
+model Writing {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String   // ringkasan singkat, tampil di kartu daftar tulisan
+  content     String?  // isi tulisan (opsional) — dipakai kalau tidak ada pdfUrl/externalUrl
+  pdfUrl      String?  // path PDF yang diunggah (mis. /uploads/paper-123.pdf) — dibaca inline di web, bukan diunduh
+  coverImage  String?
+  tags        String   @default("") // dipisah koma, mis: "UML,Sistem Informasi"
+
+  // Kalau tulisan sudah terbit di platform lain (Medium, blog kampus, jurnal, dst),
+  // isi ini supaya kartu mengarahkan langsung ke sana alih-alih halaman internal.
+  externalUrl String?
+
+  publishedAt DateTime @default(now())
+
+  // Kontrol urutan tampil (ascending)
+  order       Int      @default(0)
+
+  // Status tayang di halaman publik
+  published   Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}

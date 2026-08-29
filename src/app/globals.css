@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 40 30% 96%;      /* cream */
+  --foreground: 0 0% 14%;        /* ink */
+  --muted: 40 20% 90%;
+  --muted-foreground: 0 0% 40%;
+  --ring: 51 100% 71%;           /* yolk */
+}
+
+.dark {
+  --background: 0 0% 10%;        /* dark charcoal, sedikit lebih gelap dari ink */
+  --foreground: 40 30% 96%;      /* cream */
+  --muted: 0 0% 18%;
+  --muted-foreground: 40 10% 65%;
+  --ring: 51 100% 71%;           /* yolk tetap sama di kedua tema */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Aeonik TRIAL", "Inter", system-ui, sans-serif;
+}
+
+::selection {
+  background-color: #ffe862;
+  color: #242424;
+}
+
+/* Focus ring yang tetap terlihat untuk aksesibilitas keyboard */
+:focus-visible {
+  outline: 2px solid hsl(var(--foreground));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* ===== Circular Reveal Transition (View Transitions API) =====
+   Dipicu dari cinematic-theme-switcher saat ganti tema. --reveal-x/--reveal-y
+   diisi lewat JS dari posisi klik tombol, --reveal-radius dihitung supaya
+   lingkaran menutupi seluruh layar. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(0px at var(--reveal-x, 50%) var(--reveal-y, 50%));
+  animation: circular-reveal 750ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes circular-reveal {
+  to {
+    clip-path: circle(var(--reveal-radius, 150%) at var(--reveal-x, 50%) var(--reveal-y, 50%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(root) {
+    animation: none;
+    clip-path: none;
+  }
+}
