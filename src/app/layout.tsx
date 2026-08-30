@@ -1,3 +1,5 @@
+declare module "*.css";
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -10,37 +12,43 @@ export const metadata: Metadata = {
 };
 
 interface ThemeColors {
-  background: string;
-  foreground: string;
-  muted: string;
-  mutedForeground: string;
-  ring: string;
+  background?: string;
+  foreground?: string;
+  muted?: string;
+  mutedForeground?: string;
+  ring?: string;
 }
 
 async function getThemeOverrides() {
-  const row = await prisma.siteSettings.findUnique({ where: { key: "theme" } });
-  if (!row) return null;
   try {
-    return JSON.parse(row.valueJson) as { light: ThemeColors; dark: ThemeColors };
-  } catch {
+    const row = await prisma.siteSettings.findUnique({ where: { key: "theme" } });
+    if (!row?.valueJson) return null;
+    return JSON.parse(row.valueJson) as { light?: ThemeColors; dark?: ThemeColors };
+  } catch (error) {
+    console.error("Failed to parse theme overrides:", error);
     return null;
   }
 }
 
-// Build baris CSS var override, lewati field yang masih kosong (biar fallback ke default globals.css)
-function buildVars(colors: ThemeColors | undefined) {
-  if (!colors) return "";
-  const map: Record<string, string> = {
+// Format variabel CSS agar selalu valid saat di-inject
+function buildVars(colors?: ThemeColors) {
+  if (!colors || typeof colors !== "object") return "";
+
+  const map: Record<string, string | undefined> = {
     "--background": colors.background,
     "--foreground": colors.foreground,
     "--muted": colors.muted,
     "--muted-foreground": colors.mutedForeground,
     "--ring": colors.ring
   };
-  return Object.entries(map)
-    .filter(([, v]) => v && v.trim())
-    .map(([k, v]) => `${k}: ${v};`)
-    .join(" ");
+
+  const validEntries = Object.entries(map).filter(
+    ([, val]) => typeof val === "string" && val.trim().length > 0
+  );
+
+  if (validEntries.length === 0) return "";
+
+  return validEntries.map(([key, val]) => `${key}: ${val?.trim()};`).join(" ");
 }
 
 export default async function RootLayout({
@@ -51,25 +59,32 @@ export default async function RootLayout({
   const theme = await getThemeOverrides();
   const lightVars = buildVars(theme?.light);
   const darkVars = buildVars(theme?.dark);
+  const hasOverrides = Boolean(lightVars || darkVars);
 
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
-        {/* Override warna tema kustom dari /admin/settings. Ditaruh setelah globals.css
-            lewat urutan render, jadi menang atas nilai default kalau field-nya diisi. */}
-        {(lightVars || darkVars) && (
+        {hasOverrides && (
           <style
             id="theme-overrides"
             dangerouslySetInnerHTML={{
-              __html: `${lightVars ? `:root { ${lightVars} }` : ""} ${
+              __html: [
+                lightVars ? `:root { ${lightVars} }` : "",
                 darkVars ? `.dark { ${darkVars} }` : ""
-              }`
+              ]
+                .filter(Boolean)
+                .join(" ")
             }}
           />
         )}
       </head>
       <body className="bg-background text-foreground antialiased transition-colors duration-500">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           {children}
         </ThemeProvider>
       </body>

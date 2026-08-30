@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { ParallaxHero } from "@/components/ParallaxHero";
 import { Hero, type HeroContent } from "@/components/Hero";
@@ -67,44 +68,63 @@ const defaultSite: SiteContent = {
 };
 
 async function getSettings() {
-  const rows = await prisma.siteSettings.findMany();
-  const map = new Map(rows.map((r) => [r.key, JSON.parse(r.valueJson)]));
-  const storedSite = map.get("site") as Partial<SiteContent> | undefined;
-  return {
-    hero: (map.get("hero") as HeroContent) ?? defaultHero,
-    about: (map.get("about") as AboutContent) ?? defaultAbout,
-    contact: (map.get("contact") as ContactContent) ?? defaultContact,
-    site: {
-      ...defaultSite,
-      ...storedSite,
-      navLabels: { ...defaultSite.navLabels, ...storedSite?.navLabels }
-    } as SiteContent
-  };
+  try {
+    const rows = await prisma.siteSettings.findMany();
+    const map = new Map(rows.map((r) => [r.key, JSON.parse(r.valueJson)]));
+    const storedSite = map.get("site") as Partial<SiteContent> | undefined;
+    
+    return {
+      hero: (map.get("hero") as HeroContent) ?? defaultHero,
+      about: (map.get("about") as AboutContent) ?? defaultAbout,
+      contact: (map.get("contact") as ContactContent) ?? defaultContact,
+      site: {
+        ...defaultSite,
+        ...storedSite,
+        navLabels: { ...defaultSite.navLabels, ...storedSite?.navLabels }
+      } as SiteContent
+    };
+  } catch (error) {
+    console.error("Gagal mengambil settings dari DB:", error);
+    return {
+      hero: defaultHero,
+      about: defaultAbout,
+      contact: defaultContact,
+      site: defaultSite
+    };
+  }
 }
 
 async function getProjects(): Promise<ProjectDTO[]> {
-  const projects = await prisma.project.findMany({
-    where: { published: true },
-    orderBy: { order: "asc" }
-  });
-  return projects.map((p) => ({
-    ...p,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString()
-  }));
+  try {
+    const projects = await prisma.project.findMany({
+      where: { published: true },
+      orderBy: { order: "asc" }
+    });
+    return projects.map((p) => ({
+      ...p,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString()
+    }));
+  } catch {
+    return [];
+  }
 }
 
 async function getWritings(): Promise<WritingDTO[]> {
-  const writings = await prisma.writing.findMany({
-    where: { published: true },
-    orderBy: { order: "asc" }
-  });
-  return writings.map((w) => ({
-    ...w,
-    publishedAt: w.publishedAt.toISOString(),
-    createdAt: w.createdAt.toISOString(),
-    updatedAt: w.updatedAt.toISOString()
-  }));
+  try {
+    const writings = await prisma.writing.findMany({
+      where: { published: true },
+      orderBy: { order: "asc" }
+    });
+    return writings.map((w) => ({
+      ...w,
+      publishedAt: w.publishedAt.toISOString(),
+      createdAt: w.createdAt.toISOString(),
+      updatedAt: w.updatedAt.toISOString()
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export default async function HomePage() {
@@ -115,23 +135,41 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="relative">
-      <ParallaxHero name={site.parallaxName} scrollLabel={site.parallaxScrollLabel} />
-      <Hero content={hero} />
-      <ProjectShowcase
-        projects={projects}
-        eyebrow={site.projectsEyebrow}
-        heading={site.projectsHeading}
-      />
-      <WritingsSection
-        writings={writings}
-        eyebrow={site.writingsEyebrow}
-        heading={site.writingsHeading}
-      />
-      <About content={about} />
-      <Contact content={contact} footerText={site.footerText} />
-      <SiteNav labels={site.navLabels} />
-      <ThemeToggleFab />
+    <main className="relative min-h-screen bg-background text-foreground">
+      <section id="home">
+        <ParallaxHero name={site.parallaxName} scrollLabel={site.parallaxScrollLabel} />
+        <Hero content={hero} />
+      </section>
+
+      <section id="works">
+        <ProjectShowcase
+          projects={projects}
+          eyebrow={site.projectsEyebrow}
+          heading={site.projectsHeading}
+        />
+      </section>
+
+      <section id="writings">
+        <WritingsSection
+          writings={writings}
+          eyebrow={site.writingsEyebrow}
+          heading={site.writingsHeading}
+        />
+      </section>
+
+      <section id="about">
+        <About content={about} />
+      </section>
+
+      <section id="contact">
+        <Contact content={contact} footerText={site.footerText} />
+      </section>
+
+      {/* Menjaga navigasi dan theme switcher agar tidak bentrok dengan hydration */}
+      <Suspense fallback={null}>
+        <SiteNav labels={site.navLabels} />
+        <ThemeToggleFab />
+      </Suspense>
     </main>
   );
 }

@@ -1,7 +1,7 @@
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
 export const metadata = {
-  title: "Admin — Portofolio CMS"
+  title: "Admin — Portofolio CMS",
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
