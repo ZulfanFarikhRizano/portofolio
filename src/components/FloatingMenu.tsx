@@ -13,9 +13,10 @@ export interface MenuItem {
 
 export interface FloatingMenuProps {
   items?: MenuItem[];
+  buttonLabel?: string;
 }
 
-export default function FloatingMenu({ items }: FloatingMenuProps) {
+export default function FloatingMenu({ items, buttonLabel = "Menu" }: FloatingMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

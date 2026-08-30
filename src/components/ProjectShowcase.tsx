@@ -9,7 +9,15 @@ import { parseTags } from "@/lib/utils";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-export function ProjectShowcase({ projects }: { projects: ProjectDTO[] }) {
+export function ProjectShowcase({
+  projects,
+  eyebrow,
+  heading
+}: {
+  projects: ProjectDTO[];
+  eyebrow: string;
+  heading: string;
+}) {
   const [active, setActive] = useState(0);
 
   const slides: CoverflowSlide[] = useMemo(
@@ -36,12 +44,12 @@ export function ProjectShowcase({ projects }: { projects: ProjectDTO[] }) {
   return (
     <section id="works" className="relative px-0 py-28 md:px-0">
       <div className="mb-10 px-6 md:px-14">
-        <p className="text-[13px] uppercase tracking-[0.25em] text-foreground/50">Proyek</p>
+        <p className="text-[13px] uppercase tracking-[0.25em] text-foreground/50">{eyebrow}</p>
         <h2
           className="mt-3 text-[10vw] uppercase leading-[0.9] md:text-[4.2vw]"
           style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
         >
-          Karya Terpilih
+          {heading}
         </h2>
       </div>
 

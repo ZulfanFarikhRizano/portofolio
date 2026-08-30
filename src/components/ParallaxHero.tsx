@@ -8,7 +8,12 @@ import Image from "next/image";
 // (public/me.png) tampil di depan menutupi sebagian teks — mirip referensi
 // Osmo, tapi dibangun pakai Framer Motion (sudah dipakai di seluruh situs ini)
 // supaya nggak perlu nambah GSAP + Lenis yang bisa bentrok sama animasi lain.
-export function ParallaxHero() {
+interface ParallaxHeroProps {
+  name: string;
+  scrollLabel: string;
+}
+
+export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -23,7 +28,7 @@ export function ParallaxHero() {
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
   const fadeOut = useTransform(scrollYProgress, [0, 0.75, 1], [1, 1, 0]);
 
-  const nameParts = ["ZULFAN", "FARIKH", "RIZANO"];
+  const nameParts = name.trim().split(/\s+/);
 
   return (
     <section ref={containerRef} className="relative h-[130vh]">
@@ -109,7 +114,7 @@ export function ParallaxHero() {
           style={{ opacity: fadeOut }}
           className="absolute bottom-8 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-foreground/40"
         >
-          <span>Scroll</span>
+          <span>{scrollLabel}</span>
           <span className="h-8 w-px animate-pulse bg-foreground/30" />
         </motion.div>
       </div>

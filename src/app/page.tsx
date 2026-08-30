@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { Hero, type HeroContent } from "@/components/Hero";
 import { ParallaxHero } from "@/components/ParallaxHero";
+import { Hero, type HeroContent } from "@/components/Hero";
 import { ProjectShowcase } from "@/components/ProjectShowcase";
 import { WritingsSection } from "@/components/WritingsSection";
 import { About, type AboutContent } from "@/components/About";
@@ -30,13 +30,55 @@ const defaultContact: ContactContent = {
   socials: []
 };
 
+interface SiteContent {
+  parallaxName: string;
+  parallaxScrollLabel: string;
+  navLabels: {
+    home: string;
+    works: string;
+    writings: string;
+    about: string;
+    contact: string;
+    menuButton: string;
+  };
+  projectsEyebrow: string;
+  projectsHeading: string;
+  writingsEyebrow: string;
+  writingsHeading: string;
+  footerText: string;
+}
+
+const defaultSite: SiteContent = {
+  parallaxName: "ZULFAN FARIKH RIZANO",
+  parallaxScrollLabel: "Scroll",
+  navLabels: {
+    home: "Home",
+    works: "Works",
+    writings: "Tulisan",
+    about: "About",
+    contact: "Contact",
+    menuButton: "Menu"
+  },
+  projectsEyebrow: "Proyek",
+  projectsHeading: "Karya Terpilih",
+  writingsEyebrow: "Karya Tulis",
+  writingsHeading: "Tulisan & Catatan",
+  footerText: "Dibangun dengan Next.js, Prisma & Framer Motion"
+};
+
 async function getSettings() {
   const rows = await prisma.siteSettings.findMany();
   const map = new Map(rows.map((r) => [r.key, JSON.parse(r.valueJson)]));
+  const storedSite = map.get("site") as Partial<SiteContent> | undefined;
   return {
     hero: (map.get("hero") as HeroContent) ?? defaultHero,
     about: (map.get("about") as AboutContent) ?? defaultAbout,
-    contact: (map.get("contact") as ContactContent) ?? defaultContact
+    contact: (map.get("contact") as ContactContent) ?? defaultContact,
+    site: {
+      ...defaultSite,
+      ...storedSite,
+      navLabels: { ...defaultSite.navLabels, ...storedSite?.navLabels }
+    } as SiteContent
   };
 }
 
@@ -66,7 +108,7 @@ async function getWritings(): Promise<WritingDTO[]> {
 }
 
 export default async function HomePage() {
-  const [{ hero, about, contact }, projects, writings] = await Promise.all([
+  const [{ hero, about, contact, site }, projects, writings] = await Promise.all([
     getSettings(),
     getProjects(),
     getWritings()
@@ -74,13 +116,21 @@ export default async function HomePage() {
 
   return (
     <main className="relative">
-      <ParallaxHero />
+      <ParallaxHero name={site.parallaxName} scrollLabel={site.parallaxScrollLabel} />
       <Hero content={hero} />
-      <ProjectShowcase projects={projects} />
-      <WritingsSection writings={writings} />
+      <ProjectShowcase
+        projects={projects}
+        eyebrow={site.projectsEyebrow}
+        heading={site.projectsHeading}
+      />
+      <WritingsSection
+        writings={writings}
+        eyebrow={site.writingsEyebrow}
+        heading={site.writingsHeading}
+      />
       <About content={about} />
-      <Contact content={contact} />
-      <SiteNav />
+      <Contact content={contact} footerText={site.footerText} />
+      <SiteNav labels={site.navLabels} />
       <ThemeToggleFab />
     </main>
   );

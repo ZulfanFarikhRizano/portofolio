@@ -16,7 +16,15 @@ function formatDate(iso: string) {
   });
 }
 
-export function WritingsSection({ writings }: { writings: WritingDTO[] }) {
+export function WritingsSection({
+  writings,
+  eyebrow,
+  heading
+}: {
+  writings: WritingDTO[];
+  eyebrow: string;
+  heading: string;
+}) {
   if (writings.length === 0) return null;
 
   return (
@@ -27,7 +35,7 @@ export function WritingsSection({ writings }: { writings: WritingDTO[] }) {
           className="mt-3 text-[10vw] uppercase leading-[0.9] md:text-[4.2vw]"
           style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
         >
-          Tulisan &amp; Catatan
+          {heading}
         </h2>
       </div>
 

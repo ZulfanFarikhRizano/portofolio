@@ -11,7 +11,13 @@ export interface ContactContent {
   socials: { label: string; url: string }[];
 }
 
-export function Contact({ content }: { content: ContactContent }) {
+export function Contact({
+  content,
+  footerText
+}: {
+  content: ContactContent;
+  footerText: string;
+}) {
   return (
     <section id="contact" className="border-t border-ink/10 bg-ink px-6 py-28 text-cream md:px-14">
       <motion.p
@@ -61,7 +67,7 @@ export function Contact({ content }: { content: ContactContent }) {
       </div>
 
       <p className="mt-24 text-[12px] uppercase tracking-[0.2em] text-cream/30">
-        © {new Date().getFullYear()} · Dibangun dengan Next.js, Prisma & Framer Motion
+        © {new Date().getFullYear()} · {footerText}
       </p>
     </section>
   );
