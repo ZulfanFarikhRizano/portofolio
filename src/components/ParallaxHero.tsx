@@ -4,10 +4,6 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 
-// Section pembuka baru: nama besar dengan efek parallax scroll, foto transparan
-// (public/me.png) tampil di depan menutupi sebagian teks — mirip referensi
-// Osmo, tapi dibangun pakai Framer Motion (sudah dipakai di seluruh situs ini)
-// supaya nggak perlu nambah GSAP + Lenis yang bisa bentrok sama animasi lain.
 interface ParallaxHeroProps {
   name: string;
   scrollLabel: string;
@@ -21,71 +17,76 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
     offset: ["start start", "end start"]
   });
 
-  // Tiap layer gerak dengan kecepatan beda selama section di-scroll —
-  // ini yang menciptakan ilusi kedalaman (parallax).
   const nameY = useTransform(scrollYProgress, [0, 1], ["0%", "-25%"]);
-  const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "-55%"]);
+  const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "-45%"]);
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
   const fadeOut = useTransform(scrollYProgress, [0, 0.75, 1], [1, 1, 0]);
 
   const nameParts = name.trim().split(/\s+/);
 
   return (
-    <section ref={containerRef} className="relative h-[130vh]">
-      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-background">
-        {/* ----- Background animasi: orb gradient melayang pelan-pelan ----- */}
-        <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 overflow-hidden">
-          <motion.div
-            className="absolute left-[10%] top-[15%] size-[38vw] rounded-full bg-yolk/25 blur-[90px] dark:bg-yolk/15"
-            animate={{
-              x: [0, 40, -20, 0],
-              y: [0, -30, 20, 0],
-              scale: [1, 1.15, 0.95, 1]
+    <section ref={containerRef} className="relative h-[130vh] w-full overflow-hidden">
+      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden bg-background">
+        
+        {/* ----- BACKGROUND: MOVING GRADIENT + GRAIN TEXTURE ----- */}
+        <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          
+          {/* 1. Tekstur Grain/Noise (Adaptif Light/Dark) */}
+          <div 
+            className="absolute inset-0 opacity-[0.2] dark:opacity-[0.1]" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3%3FeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3%3F/filter%3%3F%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3%3F/svg%3E")`,
+              filter: 'contrast(120%) brightness(120%)',
             }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
+
+          {/* 2. Fluid Moving Gradient Orbs */}
+          {/* Orb Kuning (Yolk) - Bergerak Organik */}
           <motion.div
-            className="absolute bottom-[10%] right-[8%] size-[32vw] rounded-full bg-foreground/[0.06] blur-[100px]"
-            animate={{
-              x: [0, -35, 25, 0],
-              y: [0, 25, -25, 0],
-              scale: [1, 0.9, 1.1, 1]
+            className="absolute left-[-20%] top-[-20%] size-[140%] rounded-full opacity-[0.35] dark:opacity-[0.25]"
+            style={{
+              background: `radial-gradient(circle at center, ${`var(--yolk)`}, transparent 60%)`,
+              filter: 'blur(110px)',
             }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            animate={{
+              x: [0, 50, -30, 0], // Pergerakan horizontal
+              y: [0, -40, 30, 0], // Pergerakan vertikal
+            }}
+            transition={{
+              duration: 25, // Lambat dan halus
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
+
+          {/* Orb Foreground (Pudar) - Bergerak Berlawanan Arah */}
           <motion.div
-            className="absolute left-[45%] top-[55%] size-[22vw] rounded-full bg-foreground/[0.04] blur-[80px]"
-            animate={{
-              x: [0, 20, -30, 0],
-              y: [0, -20, 15, 0]
+            className="absolute bottom-[-10%] right-[-10%] size-[100%] rounded-full opacity-[0.1] dark:opacity-[0.05]"
+            style={{
+              background: `radial-gradient(circle at center, currentColor, transparent 70%)`,
+              filter: 'blur(100px)',
             }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+            animate={{
+              x: [0, -40, 50, 0],
+              y: [0, 30, -40, 0],
+            }}
+            transition={{
+              duration: 22,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
         </motion.div>
 
-        {/* OPSIONAL: foto background (kalau mau, taruh public/bg-parallax.jpg
-            lalu un-comment blok ini — dia bergerak paling lambat/belakang).
-            Sengaja dibiarkan tersimpan di sini, belum dihapus, buat dipakai nanti. */}
-        {/* <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0">
-          <Image
-            src="/bg-parallax.jpg"
-            alt=""
-            fill
-            priority
-            className="object-cover opacity-30"
-          />
-        </motion.div> */}
-
-        {/* Nama besar — dipecah per kata jadi beberapa baris (BUKAN satu baris
-            nowrap) supaya nggak pernah overflow ke samping di layar sempit. */}
+        {/* ----- NAMA BESAR (Editorial Typography) ----- */}
         <motion.div
           style={{ y: nameY, opacity: fadeOut }}
-          className="relative flex select-none flex-col items-center leading-[0.82]"
+          className="relative z-10 flex w-full select-none flex-col items-center justify-center text-center leading-[0.85]"
         >
           {nameParts.map((word) => (
             <span
               key={word}
-              className="text-[17vw] uppercase text-foreground sm:text-[13vw] md:text-[10vw]"
+              className="block w-full text-center text-[14vw] uppercase tracking-[-0.03em] text-foreground sm:text-[12vw] md:text-[9vw]"
               style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
             >
               {word}
@@ -93,15 +94,14 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
           ))}
         </motion.div>
 
-        {/* Foto transparan kamu — taruh file di public/me.png.
-            Muncul di depan, menutupi sebagian nama, gerak lebih cepat dari teks. */}
+        {/* ----- FOTO PRESISI DI TENGAH ----- */}
         <motion.div
           style={{ y: photoY }}
-          className="pointer-events-none absolute bottom-0 h-[78%] w-auto md:h-[85%]"
+          className="pointer-events-none absolute bottom-0 left-1/2 z-20 h-[70%] w-auto -translate-x-1/2 sm:h-[78%] md:h-[85%]"
         >
           <Image
             src="/me.png"
-            alt="Zulfan Farikh Rizano"
+            alt={name}
             width={700}
             height={1000}
             priority
@@ -109,14 +109,15 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
           />
         </motion.div>
 
-        {/* Petunjuk scroll di bawah */}
+        {/* ----- PETUNJUK SCROLL ----- */}
         <motion.div
           style={{ opacity: fadeOut }}
-          className="absolute bottom-8 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-foreground/40"
+          className="absolute bottom-8 z-30 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-foreground/40 md:text-[11px]"
         >
           <span>{scrollLabel}</span>
           <span className="h-8 w-px animate-pulse bg-foreground/30" />
         </motion.div>
+
       </div>
     </section>
   );
