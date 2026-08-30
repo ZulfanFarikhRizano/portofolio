@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Pakai dynamic agar Vercel tidak meng-cache API route ini secara statis
+export const dynamic = "force-dynamic";
+
 const ALLOWED_KEYS = ["hero", "about", "contact", "site", "theme"] as const;
 type SettingKey = (typeof ALLOWED_KEYS)[number];
 
@@ -44,7 +47,6 @@ const defaults: Record<SettingKey, unknown> = {
   }
 };
 
-// Helper untuk parse JSON tanpa bikin server crash kalau ada string yang invalid/kosong
 function safeJsonParse(jsonString: string) {
   try {
     return JSON.parse(jsonString);
@@ -53,12 +55,11 @@ function safeJsonParse(jsonString: string) {
   }
 }
 
-// GET /api/settings — kembalikan semua key sekaligus
+// GET /api/settings
 export async function GET() {
   try {
     const rows = await prisma.siteSettings.findMany();
-    
-    // Map data dengan safe parser
+
     const map = new Map(
       rows.map((r) => [r.key, r.valueJson ? safeJsonParse(r.valueJson) : null])
     );
@@ -66,7 +67,7 @@ export async function GET() {
     const result: Record<string, unknown> = {};
     for (const key of ALLOWED_KEYS) {
       const stored = map.get(key);
-      
+
       result[key] =
         stored && typeof stored === "object" && !Array.isArray(stored)
           ? { ...(defaults[key] as object), ...stored }
@@ -76,12 +77,11 @@ export async function GET() {
     return NextResponse.json({ data: result }, { status: 200 });
   } catch (error) {
     console.error("GET /api/settings error:", error);
-    // Kembalikan fallback default data agar frontend TIDAK crash saat database error/down
     return NextResponse.json({ data: defaults }, { status: 200 });
   }
 }
 
-// PUT /api/settings — update setting
+// PUT /api/settings
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json().catch(() => null);
@@ -111,4 +111,16 @@ export async function PUT(req: NextRequest) {
     console.error("PUT /api/settings error:", error);
     return NextResponse.json({ error: "Gagal menyimpan pengaturan." }, { status: 500 });
   }
+}
+
+// OPTIONS /api/settings (CORS Preflight Handler)
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Allow": "GET, PUT, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization"
+    }
+  });
 }
