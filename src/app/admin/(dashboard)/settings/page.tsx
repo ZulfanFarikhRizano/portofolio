@@ -60,8 +60,6 @@ const inputClass =
 const labelClass = "mb-1 block text-[13px] text-ink/60";
 const sectionClass = "rounded-2xl border border-ink/10 bg-white/60 p-6";
 
-// Warna default situs (dari globals.css) — cuma dipakai sebagai tampilan awal
-// color picker kalau field-nya masih kosong (belum di-custom).
 const defaultLight: ThemeColors = {
   background: "#f7f1ed",
   foreground: "#242424",
@@ -77,7 +75,6 @@ const defaultDark: ThemeColors = {
   ring: "#ffe862"
 };
 
-// CSS var situs disimpan format "H S% L%" (tanpa hsl(), tanpa koma) — ini konversi ke/dari hex #RRGGBB
 function hexToHslString(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -139,11 +136,28 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((json) => setSettings(json.data))
-      .catch(() => setError("Gagal memuat pengaturan."))
-      .finally(() => setLoading(false));
+    async function loadSettings() {
+      try {
+        const res = await fetch("/api/settings", { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error(`Gagal memuat data (HTTP Status ${res.status})`);
+        }
+        const text = await res.text();
+        if (!text) throw new Error("Respons server kosong.");
+        
+        const json = JSON.parse(text);
+        if (json.data) {
+          setSettings(json.data);
+        } else {
+          throw new Error(json.error ?? "Format data tidak valid.");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Gagal memuat pengaturan.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSettings();
   }, []);
 
   async function saveSection(key: keyof Settings, value: unknown) {
@@ -156,8 +170,17 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key, value })
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Gagal menyimpan.");
+
+      const text = await res.text();
+      let json;
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error("Server tidak mengembalikan format JSON yang valid.");
+      }
+
+      if (!res.ok) throw new Error(json.error ?? `Gagal menyimpan (Status ${res.status}).`);
+      
       setMessage(`Bagian "${key}" tersimpan.`);
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
