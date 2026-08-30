@@ -28,65 +28,63 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
     <section ref={containerRef} className="relative h-[130vh] w-full overflow-hidden">
       <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden bg-background">
         
-        {/* ----- BACKGROUND: MOVING GRADIENT + GRAIN TEXTURE ----- */}
+        {/* ----- BACKGROUND: MOVING GRADIENT & GRAIN ----- */}
         <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           
-          {/* 1. Tekstur Grain/Noise (Adaptif Light/Dark) */}
+          {/* Tekstur Grain */}
           <div 
-            className="absolute inset-0 opacity-[0.2] dark:opacity-[0.1]" 
+            className="absolute inset-0 opacity-[0.25] dark:opacity-[0.12]" 
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3%3FeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3%3F/filter%3%3F%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3%3F/svg%3E")`,
-              filter: 'contrast(120%) brightness(120%)',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3%3FeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3%3F/filter%3%3F%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3%3F/svg%3E")`,
             }}
           />
 
-          {/* 2. Fluid Moving Gradient Orbs */}
-          {/* Orb Kuning (Yolk) - Bergerak Organik */}
+          {/* Orb Gradient 1 (Kuning Soft / Yolk) - Bergerak Memutar/Melayang */}
           <motion.div
-            className="absolute left-[-20%] top-[-20%] size-[140%] rounded-full opacity-[0.35] dark:opacity-[0.25]"
+            className="absolute left-[15%] top-[10%] size-[55vw] rounded-full opacity-40 blur-[100px] dark:opacity-20"
             style={{
-              background: `radial-gradient(circle at center, ${`var(--yolk)`}, transparent 60%)`,
-              filter: 'blur(110px)',
+              background: "radial-gradient(circle, rgba(250,204,21,0.8) 0%, rgba(250,204,21,0) 70%)"
             }}
             animate={{
-              x: [0, 50, -30, 0], // Pergerakan horizontal
-              y: [0, -40, 30, 0], // Pergerakan vertikal
+              x: [0, 80, -40, 0],
+              y: [0, -60, 40, 0],
+              scale: [1, 1.2, 0.9, 1]
             }}
             transition={{
-              duration: 25, // Lambat dan halus
+              duration: 12,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: "easeInOut"
             }}
           />
 
-          {/* Orb Foreground (Pudar) - Bergerak Berlawanan Arah */}
+          {/* Orb Gradient 2 (Aksen Putih/Terang) - Bergerak Lawan Arah */}
           <motion.div
-            className="absolute bottom-[-10%] right-[-10%] size-[100%] rounded-full opacity-[0.1] dark:opacity-[0.05]"
+            className="absolute bottom-[10%] right-[15%] size-[45vw] rounded-full opacity-30 blur-[90px] dark:opacity-10"
             style={{
-              background: `radial-gradient(circle at center, currentColor, transparent 70%)`,
-              filter: 'blur(100px)',
+              background: "radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)"
             }}
             animate={{
-              x: [0, -40, 50, 0],
-              y: [0, 30, -40, 0],
+              x: [0, -60, 50, 0],
+              y: [0, 50, -30, 0],
+              scale: [1, 0.9, 1.1, 1]
             }}
             transition={{
-              duration: 22,
+              duration: 15,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: "easeInOut"
             }}
           />
         </motion.div>
 
-        {/* ----- NAMA BESAR (Editorial Typography) ----- */}
+        {/* ----- TEKS NAMA BESAR ----- */}
         <motion.div
           style={{ y: nameY, opacity: fadeOut }}
-          className="relative z-10 flex w-full select-none flex-col items-center justify-center text-center leading-[0.85]"
+          className="relative z-10 flex w-full select-none flex-col items-center justify-center text-center leading-[0.82]"
         >
           {nameParts.map((word) => (
             <span
               key={word}
-              className="block w-full text-center text-[14vw] uppercase tracking-[-0.03em] text-foreground sm:text-[12vw] md:text-[9vw]"
+              className="block w-full text-center text-[15vw] font-bold uppercase tracking-tight text-foreground sm:text-[12vw] md:text-[9vw]"
               style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
             >
               {word}
@@ -94,28 +92,30 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
           ))}
         </motion.div>
 
-        {/* ----- FOTO PRESISI DI TENGAH ----- */}
+        {/* ----- FOTO (PAKAI FLEX CENTER AGAR PASTI DI TENGAH 100%) ----- */}
         <motion.div
           style={{ y: photoY }}
-          className="pointer-events-none absolute bottom-0 left-1/2 z-20 h-[70%] w-auto -translate-x-1/2 sm:h-[78%] md:h-[85%]"
+          className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center"
         >
-          <Image
-            src="/me.png"
-            alt={name}
-            width={700}
-            height={1000}
-            priority
-            className="h-full w-auto object-contain object-bottom"
-          />
+          <div className="relative h-[70%] w-full max-w-2xl sm:h-[78%] md:h-[85%]">
+            <Image
+              src="/me.png"
+              alt={name}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 700px"
+              className="object-contain object-bottom"
+            />
+          </div>
         </motion.div>
 
-        {/* ----- PETUNJUK SCROLL ----- */}
+        {/* ----- SCROLL LABEL ----- */}
         <motion.div
           style={{ opacity: fadeOut }}
-          className="absolute bottom-8 z-30 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-foreground/40 md:text-[11px]"
+          className="absolute bottom-6 z-30 flex flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-foreground/40 md:text-[11px]"
         >
           <span>{scrollLabel}</span>
-          <span className="h-8 w-px animate-pulse bg-foreground/30" />
+          <span className="h-6 w-px animate-pulse bg-foreground/30 md:h-8" />
         </motion.div>
 
       </div>
