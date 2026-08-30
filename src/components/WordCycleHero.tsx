@@ -3,12 +3,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 
-// Section "kata berganti pas di-scroll" — terinspirasi referensi WordHeroPage,
-// tapi ditulis ulang supaya di-scope rapi ke section ini saja (versi aslinya
-// pakai CSS global yang nimpa tag body/header/footer mentah-mentah, bisa
-// ngerusak tampilan section lain di situs ini kalau ditempel apa adanya).
-//
-// Ganti array `words` di bawah ini buat sesuain sama kata yang kamu mau.
 const words = ["merancang.", "membangun.", "men-debug.", "mengoptimasi.", "meluncurkan."];
 
 function WordItem({
@@ -42,7 +36,7 @@ function WordItem({
   return (
     <motion.span
       style={{ opacity, y, fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
-      className="absolute inset-0 flex items-center justify-center text-[16vw] uppercase leading-none text-foreground sm:text-[12vw] md:text-[8vw]"
+      className="absolute inset-0 flex items-center justify-center text-center text-[9vw] uppercase leading-none tracking-tight text-foreground sm:text-[8vw] md:text-[7vw] lg:text-[6vw]"
     >
       {word}
     </motion.span>
@@ -58,12 +52,12 @@ export function WordCycleHero() {
   });
 
   return (
-    <section ref={containerRef} className="relative bg-background" style={{ height: `${words.length * 70}vh` }}>
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center gap-6 overflow-hidden px-6">
-        <p className="text-[13px] uppercase tracking-[0.3em] text-foreground/40">
+    <section ref={containerRef} className="relative w-full bg-background" style={{ height: `${words.length * 70}vh` }}>
+      <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center gap-4 overflow-hidden px-4">
+        <p className="text-[11px] uppercase tracking-[0.3em] text-foreground/40 md:text-[13px]">
           Yang saya suka lakukan
         </p>
-        <div className="relative h-[16vw] w-full max-w-4xl sm:h-[12vw] md:h-[8vw]">
+        <div className="relative h-[12vh] w-full max-w-5xl">
           {words.map((word, i) => (
             <WordItem
               key={word}

@@ -4,6 +4,10 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 
+// Section pembuka baru: nama besar dengan efek parallax scroll, foto transparan
+// (public/me.png) tampil di depan menutupi sebagian teks — mirip referensi
+// Osmo, tapi dibangun pakai Framer Motion (sudah dipakai di seluruh situs ini)
+// supaya nggak perlu nambah GSAP + Lenis yang bisa bentrok sama animasi lain.
 interface ParallaxHeroProps {
   name: string;
   scrollLabel: string;
@@ -17,21 +21,22 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
     offset: ["start start", "end start"]
   });
 
+  // Tiap layer gerak dengan kecepatan beda selama section di-scroll —
+  // ini yang menciptakan ilusi kedalaman (parallax).
   const nameY = useTransform(scrollYProgress, [0, 1], ["0%", "-25%"]);
-  const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "-45%"]);
+  const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "-55%"]);
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
   const fadeOut = useTransform(scrollYProgress, [0, 0.75, 1], [1, 1, 0]);
 
   const nameParts = name.trim().split(/\s+/);
 
   return (
-    <section ref={containerRef} className="relative h-[130vh] w-full overflow-hidden">
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden bg-background">
-        
-        {/* Background Animasi Orb */}
-        <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    <section ref={containerRef} className="relative h-[130vh]">
+      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-background">
+        {/* ----- Background animasi: orb gradient melayang pelan-pelan ----- */}
+        <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 overflow-hidden">
           <motion.div
-            className="absolute left-[10%] top-[15%] size-[60vw] rounded-full bg-yolk/25 blur-[90px] md:size-[38vw] dark:bg-yolk/15"
+            className="absolute left-[10%] top-[15%] size-[38vw] rounded-full bg-yolk/25 blur-[90px] dark:bg-yolk/15"
             animate={{
               x: [0, 40, -20, 0],
               y: [0, -30, 20, 0],
@@ -40,7 +45,7 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
             transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute bottom-[10%] right-[8%] size-[50vw] rounded-full bg-foreground/[0.06] blur-[100px] md:size-[32vw]"
+            className="absolute bottom-[10%] right-[8%] size-[32vw] rounded-full bg-foreground/[0.06] blur-[100px]"
             animate={{
               x: [0, -35, 25, 0],
               y: [0, 25, -25, 0],
@@ -48,17 +53,39 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
             }}
             transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
           />
+          <motion.div
+            className="absolute left-[45%] top-[55%] size-[22vw] rounded-full bg-foreground/[0.04] blur-[80px]"
+            animate={{
+              x: [0, 20, -30, 0],
+              y: [0, -20, 15, 0]
+            }}
+            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          />
         </motion.div>
 
-        {/* Nama Besar - Center Alignment */}
+        {/* OPSIONAL: foto background (kalau mau, taruh public/bg-parallax.jpg
+            lalu un-comment blok ini — dia bergerak paling lambat/belakang).
+            Sengaja dibiarkan tersimpan di sini, belum dihapus, buat dipakai nanti. */}
+        {/* <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0">
+          <Image
+            src="/bg-parallax.jpg"
+            alt=""
+            fill
+            priority
+            className="object-cover opacity-30"
+          />
+        </motion.div> */}
+
+        {/* Nama besar — dipecah per kata jadi beberapa baris (BUKAN satu baris
+            nowrap) supaya nggak pernah overflow ke samping di layar sempit. */}
         <motion.div
           style={{ y: nameY, opacity: fadeOut }}
-          className="relative z-10 flex w-full select-none flex-col items-center justify-center text-center leading-[0.85]"
+          className="relative flex select-none flex-col items-center leading-[0.82]"
         >
           {nameParts.map((word) => (
             <span
               key={word}
-              className="block w-full text-center text-[13vw] font-bold uppercase tracking-tight text-foreground sm:text-[11vw] md:text-[9vw]"
+              className="text-[17vw] uppercase text-foreground sm:text-[13vw] md:text-[10vw]"
               style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
             >
               {word}
@@ -66,14 +93,15 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
           ))}
         </motion.div>
 
-        {/* Foto Transparan - Terkunci di Tengah Layar */}
+        {/* Foto transparan kamu — taruh file di public/me.png.
+            Muncul di depan, menutupi sebagian nama, gerak lebih cepat dari teks. */}
         <motion.div
           style={{ y: photoY }}
-          className="pointer-events-none absolute bottom-0 left-1/2 z-20 h-[65%] w-auto -translate-x-1/2 sm:h-[75%] md:h-[82%]"
+          className="pointer-events-none absolute bottom-0 h-[78%] w-auto md:h-[85%]"
         >
           <Image
             src="/me.png"
-            alt={name}
+            alt="Zulfan Farikh Rizano"
             width={700}
             height={1000}
             priority
@@ -81,15 +109,14 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
           />
         </motion.div>
 
-        {/* Petunjuk Scroll */}
+        {/* Petunjuk scroll di bawah */}
         <motion.div
           style={{ opacity: fadeOut }}
-          className="absolute bottom-6 z-30 flex flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-foreground/40 md:text-[11px]"
+          className="absolute bottom-8 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-foreground/40"
         >
           <span>{scrollLabel}</span>
-          <span className="h-6 w-px animate-pulse bg-foreground/30 md:h-8" />
+          <span className="h-8 w-px animate-pulse bg-foreground/30" />
         </motion.div>
-
       </div>
     </section>
   );
