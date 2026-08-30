@@ -21,7 +21,6 @@ const defaults: Record<SettingKey, unknown> = {
     email: "hello@example.com",
     socials: []
   },
-  // Teks-teks lain yang tersebar di berbagai bagian situs (bukan Hero/About/Kontak)
   site: {
     parallaxName: "ZULFAN FARIKH RIZANO",
     parallaxScrollLabel: "Scroll",
@@ -39,51 +38,77 @@ const defaults: Record<SettingKey, unknown> = {
     writingsHeading: "Tulisan & Catatan",
     footerText: "Dibangun dengan Next.js, Prisma & Framer Motion"
   },
-  // Warna kustom tema terang & gelap. Kalau null/kosong, pakai default dari globals.css.
   theme: {
     light: { background: "", foreground: "", muted: "", mutedForeground: "", ring: "" },
     dark: { background: "", foreground: "", muted: "", mutedForeground: "", ring: "" }
   }
 };
 
-// GET /api/settings — kembalikan semua key sekaligus (fallback ke default kalau belum diisi)
-export async function GET() {
-  const rows = await prisma.siteSettings.findMany();
-  const map = new Map(rows.map((r) => [r.key, JSON.parse(r.valueJson)]));
-
-  const result: Record<string, unknown> = {};
-  for (const key of ALLOWED_KEYS) {
-    const stored = map.get(key);
-    // Merge dangkal supaya field baru yang ditambahkan di masa depan tetap ada
-    // nilai default-nya walau data lama di DB belum punya field itu.
-    result[key] =
-      stored && typeof stored === "object" && !Array.isArray(stored)
-        ? { ...(defaults[key] as object), ...stored }
-        : (stored ?? defaults[key]);
+// Helper untuk parse JSON tanpa bikin server crash kalau ada string yang invalid/kosong
+function safeJsonParse(jsonString: string) {
+  try {
+    return JSON.parse(jsonString);
+  } catch {
+    return null;
   }
-
-  return NextResponse.json({ data: result });
 }
 
-// PUT /api/settings — body: { key: "hero" | "about" | "contact" | "site" | "theme", value: {...} }
+// GET /api/settings — kembalikan semua key sekaligus
+export async function GET() {
+  try {
+    const rows = await prisma.siteSettings.findMany();
+    
+    // Map data dengan safe parser
+    const map = new Map(
+      rows.map((r) => [r.key, r.valueJson ? safeJsonParse(r.valueJson) : null])
+    );
+
+    const result: Record<string, unknown> = {};
+    for (const key of ALLOWED_KEYS) {
+      const stored = map.get(key);
+      
+      result[key] =
+        stored && typeof stored === "object" && !Array.isArray(stored)
+          ? { ...(defaults[key] as object), ...stored }
+          : (stored ?? defaults[key]);
+    }
+
+    return NextResponse.json({ data: result }, { status: 200 });
+  } catch (error) {
+    console.error("GET /api/settings error:", error);
+    // Kembalikan fallback default data agar frontend TIDAK crash saat database error/down
+    return NextResponse.json({ data: defaults }, { status: 200 });
+  }
+}
+
+// PUT /api/settings — update setting
 export async function PUT(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Body request tidak valid." }, { status: 400 });
+    }
+
     const { key, value } = body as { key: string; value: unknown };
 
     if (!ALLOWED_KEYS.includes(key as SettingKey)) {
       return NextResponse.json({ error: "Key pengaturan tidak dikenali." }, { status: 400 });
     }
 
+    const valueJson = JSON.stringify(value ?? defaults[key as SettingKey]);
+
     const updated = await prisma.siteSettings.upsert({
       where: { key },
-      update: { valueJson: JSON.stringify(value) },
-      create: { key, valueJson: JSON.stringify(value) }
+      update: { valueJson },
+      create: { key, valueJson }
     });
 
-    return NextResponse.json({ data: JSON.parse(updated.valueJson) });
+    const parsedData = safeJsonParse(updated.valueJson) ?? defaults[key as SettingKey];
+
+    return NextResponse.json({ data: parsedData }, { status: 200 });
   } catch (error) {
-    console.error(error);
+    console.error("PUT /api/settings error:", error);
     return NextResponse.json({ error: "Gagal menyimpan pengaturan." }, { status: 500 });
   }
 }
