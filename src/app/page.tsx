@@ -9,6 +9,7 @@ import { Contact, type ContactContent } from "@/components/Contact";
 import { SiteNav } from "@/components/SiteNav";
 import { ThemeToggleFab } from "@/components/ThemeToggleFab";
 import type { ProjectDTO, WritingDTO } from "@/types";
+import { WordCycleHero } from "@/components/WordCycleHero";
 
 export const dynamic = "force-dynamic";
 
@@ -139,6 +140,7 @@ export default async function HomePage() {
       <section id="home">
         <ParallaxHero name={site.parallaxName} scrollLabel={site.parallaxScrollLabel} />
         <Hero content={hero} />
+        <WordCycleHero />
       </section>
 
       <section id="works">

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
+import { WarpBackground } from "@/components/ui/warp-background";
 
 // Section pembuka baru: nama besar dengan efek parallax scroll, foto transparan
 // (public/me.png) tampil di depan menutupi sebagian teks — mirip referensi
@@ -25,56 +26,24 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
   // ini yang menciptakan ilusi kedalaman (parallax).
   const nameY = useTransform(scrollYProgress, [0, 1], ["0%", "-25%"]);
   const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "-55%"]);
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "-10%"]);
   const fadeOut = useTransform(scrollYProgress, [0, 0.75, 1], [1, 1, 0]);
 
   const nameParts = name.trim().split(/\s+/);
 
   return (
     <section ref={containerRef} className="relative h-[130vh]">
-      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-background">
-        {/* ----- Background animasi: orb gradient melayang pelan-pelan ----- */}
-        <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0 overflow-hidden">
-          <motion.div
-            className="absolute left-[10%] top-[15%] size-[38vw] rounded-full bg-yolk/25 blur-[90px] dark:bg-yolk/15"
-            animate={{
-              x: [0, 40, -20, 0],
-              y: [0, -30, 20, 0],
-              scale: [1, 1.15, 0.95, 1]
-            }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-[10%] right-[8%] size-[32vw] rounded-full bg-foreground/[0.06] blur-[100px]"
-            animate={{
-              x: [0, -35, 25, 0],
-              y: [0, 25, -25, 0],
-              scale: [1, 0.9, 1.1, 1]
-            }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute left-[45%] top-[55%] size-[22vw] rounded-full bg-foreground/[0.04] blur-[80px]"
-            animate={{
-              x: [0, 20, -30, 0],
-              y: [0, -20, 15, 0]
-            }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </motion.div>
-
-        {/* OPSIONAL: foto background (kalau mau, taruh public/bg-parallax.jpg
-            lalu un-comment blok ini — dia bergerak paling lambat/belakang).
-            Sengaja dibiarkan tersimpan di sini, belum dihapus, buat dipakai nanti. */}
-        {/* <motion.div style={{ y: bgY }} className="pointer-events-none absolute inset-0">
-          <Image
-            src="/bg-parallax.jpg"
-            alt=""
-            fill
-            priority
-            className="object-cover opacity-30"
-          />
-        </motion.div> */}
+      <WarpBackground
+        beamsPerSide={5}
+        beamSize={4}
+        beamDuration={5}
+        className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden rounded-none border-0 bg-background p-0"
+      >
+        {/* OPSIONAL: foto background statis (kalau suatu saat mau ditambah di ATAS
+            efek grid WarpBackground, taruh public/bg-parallax.jpg lalu un-comment):
+        <div className="pointer-events-none absolute inset-0">
+          <Image src="/bg-parallax.jpg" alt="" fill priority className="object-cover opacity-20" />
+        </div>
+        */}
 
         {/* Nama besar — dipecah per kata jadi beberapa baris (BUKAN satu baris
             nowrap) supaya nggak pernah overflow ke samping di layar sempit. */}
@@ -117,7 +86,7 @@ export function ParallaxHero({ name, scrollLabel }: ParallaxHeroProps) {
           <span>{scrollLabel}</span>
           <span className="h-8 w-px animate-pulse bg-foreground/30" />
         </motion.div>
-      </div>
+      </WarpBackground>
     </section>
   );
 }
