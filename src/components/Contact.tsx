@@ -19,7 +19,17 @@ export function Contact({
   footerText: string;
 }) {
   return (
-    <section id="contact" className="border-t border-ink/10 bg-ink px-6 py-28 text-cream md:px-14">
+    <section id="contact" className="relative overflow-hidden border-t border-ink/10 bg-ink px-6 py-28 text-cream md:px-14">
+      {/* Glow warna lembut di background gelap — biar nggak plain hitam doang */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 -top-24 size-[45vw] rounded-full bg-teal/20 blur-[110px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-32 -right-16 size-[38vw] rounded-full bg-coral/15 blur-[110px]"
+      />
+
       <motion.p
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -38,9 +48,9 @@ export function Contact({
         transition={{ duration: 0.7, ease, delay: 0.1 }}
         className="mt-6 flex items-center gap-4 text-[9vw] uppercase leading-none tracking-tight transition hover:opacity-80 md:text-[4vw]"
         style={{
-        fontFamily: "'Trobika', 'Bebas Neue', sans-serif",
-        wordBreak: "break-all",
-        overflowWrap: "anywhere"
+          fontFamily: "'Trobika', 'Bebas Neue', sans-serif",
+          wordBreak: "break-all",
+          overflowWrap: "anywhere"
         }}
       >
         <Mail className="size-[0.6em]" />

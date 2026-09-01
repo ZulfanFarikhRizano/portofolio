@@ -46,14 +46,21 @@ export function About({ content }: { content: AboutContent }) {
             transition={{ duration: 0.6, ease, delay: 0.3 }}
             className="mt-8 flex flex-wrap gap-2"
           >
-            {content.skills.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full bg-foreground/5 px-4 py-2 text-[13px] uppercase tracking-wide text-foreground/70"
-              >
-                {skill}
-              </span>
-            ))}
+            {content.skills.map((skill, i) => {
+              const palette = [
+                "bg-yolk/20 text-yolkDeep",
+                "bg-teal/15 text-tealDeep",
+                "bg-coral/15 text-coralDeep"
+              ];
+              return (
+                <span
+                  key={skill}
+                  className={`rounded-full px-4 py-2 text-[13px] uppercase tracking-wide ${palette[i % palette.length]}`}
+                >
+                  {skill}
+                </span>
+              );
+            })}
           </motion.div>
         </div>
       </div>

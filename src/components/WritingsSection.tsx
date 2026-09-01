@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, FileText } from "lucide-react";
+import { Reveal } from "./Reveal";
 import type { WritingDTO } from "@/types";
 import { parseTags } from "@/lib/utils";
 
@@ -29,15 +30,18 @@ export function WritingsSection({
 
   return (
     <section id="writings" className="border-t border-foreground/10 px-6 py-28 md:px-14">
-      <div className="mb-14">
-        <p className="text-[13px] uppercase tracking-[0.25em] text-foreground/50">Karya Tulis</p>
+      <Reveal className="mb-14">
+        <p className="flex items-center gap-2 text-[13px] uppercase tracking-[0.25em] text-foreground/50">
+          <span className="size-1.5 rounded-full bg-coral" />
+          {eyebrow}
+        </p>
         <h2
           className="mt-3 text-[10vw] uppercase leading-[0.9] md:text-[4.2vw]"
           style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
         >
           {heading}
         </h2>
-      </div>
+      </Reveal>
 
       <div className="grid gap-6 md:grid-cols-2">
         {writings.map((writing, i) => {

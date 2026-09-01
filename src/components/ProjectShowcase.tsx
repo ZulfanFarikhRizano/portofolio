@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Github, Figma as FigmaIcon } from "lucide-react";
 import { CoverflowCarousel, type CoverflowSlide } from "./CoverflowCarousel";
+import { Reveal } from "./Reveal";
 import type { ProjectDTO } from "@/types";
 import { parseTags } from "@/lib/utils";
 
@@ -43,15 +44,18 @@ export function ProjectShowcase({
 
   return (
     <section id="works" className="relative px-0 py-28 md:px-0">
-      <div className="mb-10 px-6 md:px-14">
-        <p className="text-[13px] uppercase tracking-[0.25em] text-foreground/50">{eyebrow}</p>
+      <Reveal className="mb-10 px-6 md:px-14">
+        <p className="flex items-center gap-2 text-[13px] uppercase tracking-[0.25em] text-foreground/50">
+          <span className="size-1.5 rounded-full bg-teal" />
+          {eyebrow}
+        </p>
         <h2
           className="mt-3 text-[10vw] uppercase leading-[0.9] md:text-[4.2vw]"
           style={{ fontFamily: "'Trobika', 'Bebas Neue', sans-serif" }}
         >
           {heading}
         </h2>
-      </div>
+      </Reveal>
 
       <CoverflowCarousel
         slides={slides}
@@ -93,7 +97,7 @@ export function ProjectShowcase({
 
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               {current.liveUrl && (
-                <a
+                
                   href={current.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -104,7 +108,7 @@ export function ProjectShowcase({
                 </a>
               )}
               {current.githubUrl && (
-                <a
+                
                   href={current.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -115,7 +119,7 @@ export function ProjectShowcase({
                 </a>
               )}
               {current.figmaUrl && (
-                <a
+                
                   href={current.figmaUrl}
                   target="_blank"
                   rel="noopener noreferrer"

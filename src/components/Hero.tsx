@@ -17,6 +17,16 @@ export function Hero({ content }: { content: HeroContent }) {
       id="home"
       className="relative flex min-h-[92vh] flex-col justify-center overflow-hidden px-6 pt-28 md:px-14"
     >
+      {/* Glow warna lembut di background — variasi dari ParallaxHero di atasnya */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-32 top-10 size-[40vw] rounded-full bg-teal/10 blur-[110px] dark:bg-teal/[0.07]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 bottom-0 size-[32vw] rounded-full bg-coral/10 blur-[100px] dark:bg-coral/[0.06]"
+      />
+
       <motion.p
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

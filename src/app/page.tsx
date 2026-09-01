@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { ParallaxHero } from "@/components/ParallaxHero";
 import { Hero, type HeroContent } from "@/components/Hero";
+import { WordCycleHero } from "@/components/WordCycleHero";
+import { CursorGlow } from "@/components/CursorGlow";
 import { ProjectShowcase } from "@/components/ProjectShowcase";
 import { WritingsSection } from "@/components/WritingsSection";
 import { About, type AboutContent } from "@/components/About";
@@ -9,7 +11,6 @@ import { Contact, type ContactContent } from "@/components/Contact";
 import { SiteNav } from "@/components/SiteNav";
 import { ThemeToggleFab } from "@/components/ThemeToggleFab";
 import type { ProjectDTO, WritingDTO } from "@/types";
-import { WordCycleHero } from "@/components/WordCycleHero";
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +74,7 @@ async function getSettings() {
     const rows = await prisma.siteSettings.findMany();
     const map = new Map(rows.map((r) => [r.key, JSON.parse(r.valueJson)]));
     const storedSite = map.get("site") as Partial<SiteContent> | undefined;
-    
+
     return {
       hero: (map.get("hero") as HeroContent) ?? defaultHero,
       about: (map.get("about") as AboutContent) ?? defaultAbout,
@@ -106,7 +107,8 @@ async function getProjects(): Promise<ProjectDTO[]> {
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString()
     }));
-  } catch {
+  } catch (error) {
+    console.error("Gagal mengambil projects dari DB:", error);
     return [];
   }
 }
@@ -123,7 +125,8 @@ async function getWritings(): Promise<WritingDTO[]> {
       createdAt: w.createdAt.toISOString(),
       updatedAt: w.updatedAt.toISOString()
     }));
-  } catch {
+  } catch (error) {
+    console.error("Gagal mengambil writings dari DB:", error);
     return [];
   }
 }
@@ -137,6 +140,8 @@ export default async function HomePage() {
 
   return (
     <main className="relative min-h-screen bg-background text-foreground">
+      <CursorGlow />
+
       <section id="home">
         <ParallaxHero name={site.parallaxName} scrollLabel={site.parallaxScrollLabel} />
         <Hero content={hero} />
@@ -167,7 +172,6 @@ export default async function HomePage() {
         <Contact content={contact} footerText={site.footerText} />
       </section>
 
-      {/* Menjaga navigasi dan theme switcher agar tidak bentrok dengan hydration */}
       <Suspense fallback={null}>
         <SiteNav labels={site.navLabels} />
         <ThemeToggleFab />
