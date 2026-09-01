@@ -97,7 +97,7 @@ export function ProjectShowcase({
 
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               {current.liveUrl && (
-                
+                <a
                   href={current.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -108,7 +108,7 @@ export function ProjectShowcase({
                 </a>
               )}
               {current.githubUrl && (
-                
+                <a
                   href={current.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -119,7 +119,7 @@ export function ProjectShowcase({
                 </a>
               )}
               {current.figmaUrl && (
-                
+                <a
                   href={current.figmaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
